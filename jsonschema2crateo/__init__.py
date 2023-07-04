@@ -37,21 +37,21 @@ class JSONSchema2CrateO:
 
     def __init__(self,
                  input_json_schema_path: Optional[str] = None,
-                 output_crato_profile_path: Optional[str] = None,
+                 output_crateo_profile_path: Optional[str] = None,
                  version: Optional[str] = None,
                  ) -> None:
         self.input_json_schema_path: Optional[str] = input_json_schema_path
-        self.output_crato_profile_path: Optional[str] = output_crato_profile_path
+        self.output_crateo_profile_path: Optional[str] = output_crateo_profile_path
         self.version: str = version or "0.0.0"
 
         self.input_json_schema: Dict = {}
-        self.output_crato_profile: Dict = {}
+        self.output_crateo_profile: Dict = {}
 
         if input_json_schema_path:
             self.load(version)
 
-        if output_crato_profile_path:
-            self.output_crato_profile = self.translate(self.input_json_schema)
+        if output_crateo_profile_path:
+            self.output_crateo_profile = self.translate(self.input_json_schema)
             self.write()
 
     def load(self,
@@ -177,7 +177,7 @@ class JSONSchema2CrateO:
         """
         Function to translate input JSON schema to an output Crate-O profile
         :param input_json_schema:
-        :return: output_crato_profile
+        :return: output_crateo_profile
         """
         crateo_profile = {}
         input_graph = input_json_schema["@graph"]
@@ -198,14 +198,14 @@ class JSONSchema2CrateO:
         return crateo_profile
 
     def write(self,
-              output_crato_profile_path: Optional[str] = None
+              output_crateo_profile_path: Optional[str] = None
               ) -> None:
-        assert self.output_crato_profile, "Empty output_crato_profile"
+        assert self.output_crateo_profile, "Empty output_crateo_profile"
 
-        if output_crato_profile_path:
-            self.output_crato_profile_path = output_crato_profile_path
+        if output_crateo_profile_path:
+            self.output_crateo_profile_path = output_crateo_profile_path
 
-        assert self.output_crato_profile_path, 'No output_crato_profile_path provided'
+        assert self.output_crateo_profile_path, 'No output_crateo_profile_path provided'
 
-        with open(self.output_crato_profile_path, 'w') as output_crato_profile_file:
-            output_crato_profile_file.write(json.dumps(self.output_crato_profile, indent='\t'))
+        with open(self.output_crateo_profile_path, 'w') as output_crateo_profile_file:
+            output_crateo_profile_file.write(json.dumps(self.output_crateo_profile, indent='\t'))
