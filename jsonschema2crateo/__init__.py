@@ -1,5 +1,6 @@
 import json
-from typing import Optional, Dict, Tuple
+import re
+from typing import Optional, Dict, Tuple, List
 
 TYPE_MAPPING = {
     "string": "Text",
@@ -18,13 +19,15 @@ def property_is_multiple(property_values: Dict,
     :return: bool, True if property can hold multiple values, False otherwise
     """
     return bool(
+        (cardinality := property_values.get("owl:cardinality")) and (cardinality == "many")
+        or
         (property_type := property_values.get("type")) and (property_type == "array")
         or
         (
-                (oneOf := property_values.get("oneOf")) and
+                (type_definition_list := property_values.get("oneOf") or  property_values.get("anyOf")) and
                 any(
-                    [(oneOf_type := oneOf_item.get("type")) and (oneOf_type == "array")
-                     for oneOf_item in oneOf]
+                    [(type_definition_type := type_definition.get("type")) and (type_definition_type == "array")
+                     for type_definition in type_definition_list]
                 )
         )
     )
@@ -46,6 +49,7 @@ class JSONSchema2CrateO:
 
         self.input_json_schema: Dict = {}
         self.output_crateo_profile: Dict = {}
+        self.context = {}
 
         if input_json_schema_path:
             self.load(version)
@@ -70,61 +74,41 @@ class JSONSchema2CrateO:
         with open(self.input_json_schema_path, 'r') as input_json_schema_file:
             self.input_json_schema = json.loads(input_json_schema_file.read())
 
-    """
-    "name": {
-        "description": "The name of the item.",
-        "type": "string",
-        "owl:cardinality": "one"
-    },
-    {
-      "id": "http://schema.org/name",
-      "name": "name",
-      "label": "Name",
-      "help": "The name of this dataset",
-      "required": true,
-      "multiple": false,
-      "type": [
-        "Text"
-      ]
-    },
-    """
+        self.context = self.input_json_schema.get("@context", {})
 
-    """
-    "author": {
-        "description": "The author of this content or rating. Please note that author is special in that HTML 5 provides a special mechanism for indicating authorship via the rel tag. That is equivalent to this and may be used interchangeably.",
-        "anyOf": [
-            {
-                "$ref": "#/definitions/organization"
-            },
-            {
-                "type": "array",
-                "items": {
-                    "$ref": "#/definitions/organization"
-                }
-            },
-            {
-                "$ref": "#/definitions/person"
-            },
-            {
-                "type": "array",
-                "items": {
-                    "$ref": "#/definitions/person"
-                }
-            }
-        ],
-        "owl:cardinality": "many"
-    },
-    {
-      "id": "http://schema.org/author",
-      "name": "author",
-      "help": "The person or organization responsible for creating this collection of data",
-      "type": [
-        "Person",
-        "Organization"
-      ],
-      "multiple": true
-    },
-    """
+    def convert_type_def(self, type_definition: Dict) -> List[Dict]:
+        result_list = []
+
+        if type_ref := type_definition.get("$ref"):  # Reference to class
+            type_value = re.match(
+                r"#/definitions/(.*)",
+                type_ref
+            ).group(1).title()
+            result_list.append({"type": type_value})
+
+        elif type_value := type_definition.get("type"):
+            if type(type_value) == str:
+                if type_value == "array":
+                    # Recursive call to process array type
+                    result_list += self.convert_type_def(type_definition["items"])
+                else:  # Simple type, e.g. "string"
+                    result = dict(type_definition)
+                    result["type"] = TYPE_MAPPING.get(result["type"], result["type"])  # Map type name if required
+                    result_list.append(result)
+            elif type(type_value) == dict:
+                result_list += self.convert_type_def(type_value)
+
+        # "oneOf" and "anyOf" both contain list of type definitions. Only differ in cardinality
+        elif subtype_list := type_definition.get("oneOf") or type_definition.get("anyOf"):
+            for subtype_definition in subtype_list:
+                if description := type_definition.get("description"):
+                    subtype_definition["description"] = description
+                result_list += self.convert_type_def(subtype_definition)
+
+        else:
+            raise Exception(f"Unrecognised type_definition {type_definition}")
+
+        return result_list
 
     def property2input(self,
                        property_name: str,
@@ -138,13 +122,34 @@ class JSONSchema2CrateO:
         :param input_required: bool = False,
         :return: crateo_input
         """
+        type_dict_list = self.convert_type_def(property_values)
+        type_list = sorted(set([type_dict["type"] for type_dict in type_dict_list]))
+        help = (
+                ', '.join(
+                    sorted(set([
+                        type_dict.get("description")
+                        for type_dict in type_dict_list
+                        if type_dict.get("description")
+                    ]))
+                )
+                or
+                ', '.join(
+                    sorted(set([
+                        type_dict.get("format")
+                        for type_dict in type_dict_list
+                        if type_dict.get("format")
+                    ]))
+                )
+        )
+
         crateo_input = {
             "id": PROPERTY_MAPPING.get(property_name, property_name),
             "name": PROPERTY_MAPPING.get(property_name, property_name),
             "label": property_name,
-            "help": "",
+            "help": help,
             "required": input_required,
             "multiple": property_is_multiple(property_values),
+            "type": type_list,
         }
 
         return crateo_input
@@ -159,19 +164,36 @@ class JSONSchema2CrateO:
         :param definition_values:
         :return: Tuple[str, Dict], crateo_class_name, crateo_class
         """
+        properties = (
+                definition_values.get("properties", {})
+                or
+                definition_values.get("vocabulary", {}).get("property", {})
+        )
+
+        superclasses = definition_values.get("vocabulary", {}).get("children_of", [])
+
         crateo_class = {
             "definition": "override",
-            "subClassOf": [],
+            "subClassOf": superclasses,
             "inputs": [
                 self.property2input(property_name,
                                     property_values,
                                     (property_name in definition_values.get("required", []))
                                     )
-                for property_name, property_values in definition_values.get("properties", {}).items()
+                for property_name, property_values in properties.items()
             ]
         }
 
         return definition_name.title(), crateo_class
+
+    def apply_context(self, identifier: str) -> str:
+        prefix_match = re.match(r'(.+):(.*)', identifier)
+        if prefix_match:
+            prefix = prefix_match.group(1)
+            suffix = prefix_match.group(2)
+            identifier = f'{self.context[prefix]}{suffix}'
+
+        return identifier
 
     def translate(self, input_json_schema: Dict) -> Dict:
         """
@@ -180,20 +202,40 @@ class JSONSchema2CrateO:
         :return: output_crateo_profile
         """
         crateo_profile = {}
+
         input_graph = input_json_schema["@graph"]
+
+        crateo_classes = {}
         for subgraph in input_graph:
-            if subgraph["@type"] == "rdfs:Class":
-                input_validation = subgraph.get("$validation")
-                if input_validation:
-                    input_properties = input_validation["properties"]
-                    input_definitions = input_validation["definitions"]
+            class_dict = {
+                "definition": "override",
+            }
 
-                    crateo_classes = {}
-                    for definition_name, definition_values in input_definitions.items():
-                        crateo_class_name, crateo_class = self.definition2class(definition_name, definition_values)
-                        crateo_classes[crateo_class_name] = crateo_class
+            crateo_classes[self.apply_context(subgraph["@id"])] = class_dict
 
-                    crateo_profile["classes"] = crateo_classes
+            if rdfs_subclass := subgraph.get("rdfs:subClassOf"):
+                class_dict["subClassOf"] = [rdfs_subclass],
+
+            if input_validation := subgraph.get("$validation"):
+                properties = input_validation["properties"]
+
+                class_dict["inputs"] = [
+                    self.property2input(property_name,
+                                        property_values,
+                                        (property_name in input_validation.get("required", []))
+                                        )
+                    for property_name, property_values in properties.items()
+                ]
+
+                input_definitions = input_validation["definitions"]
+
+                # Create a class for every definition
+                for definition_name, definition_values in input_definitions.items():
+                    crateo_class_name, crateo_class = self.definition2class(definition_name, definition_values)
+                    if crateo_class:
+                        crateo_classes[self.apply_context(crateo_class_name)] = crateo_class
+
+        crateo_profile["classes"] = crateo_classes
 
         return crateo_profile
 

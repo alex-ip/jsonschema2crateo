@@ -29,9 +29,37 @@ SINGLE_PROPERTY = {
     "type": "string"
 }
 
+CARDINALITY_MANY_PROPERTY = {
+    "description": "Features or modules provided by this application (and possibly required by other applications). Functionality provided by the tool. Note: Bioschemas have removed Text from the Expected Types.",
+    "anyOf": [
+        {
+            "$ref": "#/definitions/edamOperation"
+        },
+        {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/edamOperation"
+            }
+        },
+        {
+            "type": "string",
+            "format": "uri"
+        },
+        {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        }
+    ],
+    "owl:cardinality": "many"
+}
+
 
 @pytest.mark.parametrize("test_name, property_values, expected_result",
                          [
+                             ('Cardinality many property test', CARDINALITY_MANY_PROPERTY, True),
                              ('Multi property oneOf test', MULTI_PROPERTY_ONEOF, True),
                              ('Multi property array test', MULTI_PROPERTY_ARRAY, True),
                              ('Single property test', SINGLE_PROPERTY, False),
