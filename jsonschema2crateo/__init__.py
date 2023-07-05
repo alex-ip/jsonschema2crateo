@@ -214,7 +214,7 @@ class JSONSchema2CrateO:
             crateo_classes[self.apply_context(subgraph["@id"])] = class_dict
 
             if rdfs_subclass := subgraph.get("rdfs:subClassOf"):
-                class_dict["subClassOf"] = [rdfs_subclass],
+                class_dict["subClassOf"] = [self.apply_context(rdfs_subclass["@id"])],
 
             if input_validation := subgraph.get("$validation"):
                 properties = input_validation["properties"]
