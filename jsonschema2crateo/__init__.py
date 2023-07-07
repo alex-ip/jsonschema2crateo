@@ -24,7 +24,7 @@ def property_is_multiple(property_values: Dict,
         (property_type := property_values.get("type")) and (property_type == "array")
         or
         (
-                (type_definition_list := property_values.get("oneOf") or  property_values.get("anyOf")) and
+                (type_definition_list := property_values.get("oneOf") or property_values.get("anyOf")) and
                 any(
                     [(type_definition_type := type_definition.get("type")) and (type_definition_type == "array")
                      for type_definition in type_definition_list]
@@ -202,6 +202,7 @@ class JSONSchema2CrateO:
         :return: output_crateo_profile
         """
         crateo_profile = {}
+        root_dataset = None
 
         input_graph = input_json_schema["@graph"]
 
@@ -210,14 +211,26 @@ class JSONSchema2CrateO:
             class_dict = {
                 "definition": "override",
             }
-
-            crateo_classes[self.apply_context(subgraph["@id"])] = class_dict
+            class_id = self.apply_context(subgraph["@id"])
 
             if rdfs_subclass := subgraph.get("rdfs:subClassOf"):
                 class_dict["subClassOf"] = [self.apply_context(rdfs_subclass["@id"])],
 
             if input_validation := subgraph.get("$validation"):
                 properties = input_validation["properties"]
+
+                # Only add classes for definitions with properties
+                # Assume first class in spec is the root dataset
+                if not root_dataset:
+                    root_dataset = class_id
+
+                    crateo_profile["metadata"] = {
+                        "name": subgraph["rdfs:label"],
+                        "description": subgraph["rdfs:comment"],
+                        "version": "0.0.0"
+                    }
+
+                crateo_classes[class_id] = class_dict
 
                 class_dict["inputs"] = [
                     self.property2input(property_name,
@@ -231,9 +244,15 @@ class JSONSchema2CrateO:
 
                 # Create a class for every definition
                 for definition_name, definition_values in input_definitions.items():
-                    crateo_class_name, crateo_class = self.definition2class(definition_name, definition_values)
-                    if crateo_class:
-                        crateo_classes[self.apply_context(crateo_class_name)] = crateo_class
+                    definition_class_name, definition_class = self.definition2class(definition_name, definition_values)
+                    if definition_class:
+                        crateo_classes[self.apply_context(definition_class_name)] = definition_class
+
+        crateo_profile["rootDatasets"] = {
+            "Schema": {
+                "type": root_dataset
+            }
+        }
 
         crateo_profile["classes"] = crateo_classes
 
