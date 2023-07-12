@@ -1,0 +1,100 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "@vocab": "http://schema.org/"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "./",
+      "@type": "https://discovery.biothings.io/view/bioschemas/ComputationalTool",
+      "input": {
+        "@id": "https://json-schema.org/"
+      },
+      "output": {
+        "@id": "https://json.org/"
+      },
+      "programmingLanguage": {
+        "@id": "https://www.python.org/"
+      },
+      "applicationCategory": [],
+      "applicationSubCategory": [],
+      "featureList": [],
+      "description": "A utility to convert BioSchemas JSON Schema RO-Crate profiles into Crate-O profiles",
+      "name": [],
+      "url": "https://github.com/alex-ip/jsonschema2crateo",
+      "author": {
+        "@id": "https://orcid.org/0000-0001-8937-8904"
+      },
+      "publisher": {
+        "@id": "http://viaf.org/viaf/149450342"
+      },
+      "codeRepository": "https://github.com/alex-ip/jsonschema2crateo",
+      "downloadUrl": "https://github.com/alex-ip/jsonschema2crateo/archive/refs/heads/main.zip",
+      "applicationSuite": [],
+      "provider": {
+        "@id": "https://viaf.org/viaf/149450342/"
+      }
+    },
+    {
+      "@id": "https://json-schema.org/",
+      "@type": "Formalparameter",
+      "name": "JSON Schema RO-Crate Profile specification",
+      "url": []
+    },
+    {
+      "@id": "https://json.org/",
+      "@type": "Formalparameter",
+      "name": "Crate-O Profile JSON file"
+    },
+    {
+      "@id": "https://www.python.org/",
+      "@type": "Computerlanguage",
+      "name": "Python"
+    },
+    {
+      "@id": "https://orcid.org/0000-0001-8937-8904",
+      "@type": "Person",
+      "name": "Alex Ip",
+      "givenName": "Alex",
+      "familyName": "Ip",
+      "affiliation": {
+        "@id": "http://viaf.org/viaf/149450342"
+      }
+    },
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "identifier": "ro-crate-metadata.json",
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "#undefined-applicationSubCategory-1",
+      "@type": "Edamtopic",
+      "name": []
+    },
+    {
+      "@id": "#undefined-featureList-1",
+      "@type": "Edamoperation",
+      "name": ""
+    },
+    {
+      "@id": "http://viaf.org/viaf/149450342",
+      "@type": "Organization",
+      "name": "AARNet Pty Ltd"
+    },
+    {
+      "@id": "",
+      "@type": "Organization",
+      "name": ""
+    },
+    {
+      "@id": "https://viaf.org/viaf/149450342/",
+      "@type": "Organization",
+      "name": "AARNet Pty Ltd"
+    }
+  ]
+}

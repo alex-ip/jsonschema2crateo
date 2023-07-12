@@ -10,6 +10,76 @@ PROPERTY_MAPPING = {
     "identifier": "@id"
 }
 
+DATASET_CLASS = {
+    "definition": "override",
+    "subClassOf": [],
+    "inputs": [
+        {
+            "id": "http://schema.org/mentions",
+            "name": "mentions",
+            "help": "The Classes, Properties etc",
+            "type": [
+                "rdfs:Class",
+                "rdf:Property",
+                "definedTerm",
+                "definedTermSet"
+            ],
+            "multiple": True
+        },
+        {
+            "id": "http://schema.org/name",
+            "name": "name",
+            "label": "Name",
+            "help": "The name of this ontology",
+            "required": True,
+            "multiple": False,
+            "type": [
+                "Text"
+            ]
+        },
+        {
+            "id": "http://schema.org/author",
+            "name": "author",
+            "help": "The person or organization responsible for creating this collection of data",
+            "type": [
+                "Person",
+                "Organization"
+            ],
+            "multiple": True
+        },
+        {
+            "id": "http://schema.org/publisher",
+            "name": "publisher",
+            "help": "The organization responsible for releasing this collection of data",
+            "type": [
+                "Organization"
+            ],
+            "multiple": True
+        },
+        {
+            "id": "http://schema.org/description",
+            "name": "description",
+            "help": "An abstract of the collection. Include as much detail as possible about the motivation and use of "
+                    "the collection, including things that we do not yet have properties for",
+            "type": [
+                "TextArea"
+            ],
+            "multiple": False
+        }
+    ]
+}
+
+ENABLED_CLASSES = [
+    "Dataset",
+    "Person",
+    "Organization",
+    "Book",
+    "ScholarlyArticle",
+    "RepositoryCollection",
+    "CreativeWork",
+    "CollectionProtocol",
+]
+
 
 def property_is_multiple(property_values: Dict,
                          ) -> bool:
@@ -124,7 +194,7 @@ class JSONSchema2CrateO:
         """
         type_dict_list = self.convert_type_def(property_values)
         type_list = sorted(set([type_dict["type"] for type_dict in type_dict_list]))
-        help = (
+        help_value = (
                 ', '.join(
                     sorted(set([
                         type_dict.get("description")
@@ -146,7 +216,7 @@ class JSONSchema2CrateO:
             "id": PROPERTY_MAPPING.get(property_name, property_name),
             "name": PROPERTY_MAPPING.get(property_name, property_name),
             "label": property_name,
-            "help": help,
+            "help_value": help_value,
             "required": input_required,
             "multiple": property_is_multiple(property_values),
             "type": type_list,
@@ -206,7 +276,9 @@ class JSONSchema2CrateO:
 
         input_graph = input_json_schema["@graph"]
 
-        crateo_classes = {}
+        # Add compulsory Dataset class
+        crateo_classes = {"Dataset": DATASET_CLASS}
+
         for subgraph in input_graph:
             class_dict = {
                 "definition": "override",
@@ -250,9 +322,21 @@ class JSONSchema2CrateO:
 
         crateo_profile["rootDatasets"] = {
             "Schema": {
-                "type": root_dataset
+                "type": f"http://schema.org/Dataset, {root_dataset}"
             }
         }
+
+        crateo_profile["layouts"] = {
+            root_dataset: [
+                {
+                    "name": "Main",
+                    "description": "",
+                    "inputs": [class_input['id'] for class_input in crateo_classes[root_dataset]['inputs']]
+                }
+            ]
+        }
+
+        crateo_profile["enabledClasses"] = list(ENABLED_CLASSES) + [root_dataset]
 
         crateo_profile["classes"] = crateo_classes
 
