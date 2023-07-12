@@ -28,13 +28,13 @@
         "@id": "https://orcid.org/0000-0001-8937-8904"
       },
       "publisher": {
-        "@id": "http://viaf.org/viaf/149450342"
+        "@id": "https://ror.org/03j2gem75"
       },
       "codeRepository": "https://github.com/alex-ip/jsonschema2crateo",
       "downloadUrl": "https://github.com/alex-ip/jsonschema2crateo/archive/refs/heads/main.zip",
       "applicationSuite": [],
       "provider": {
-        "@id": "https://viaf.org/viaf/149450342/"
+        "@id": "https://ror.org/03j2gem75"
       }
     },
     {
@@ -60,7 +60,7 @@
       "givenName": "Alex",
       "familyName": "Ip",
       "affiliation": {
-        "@id": "http://viaf.org/viaf/149450342"
+        "@id": "https://ror.org/03j2gem75"
       }
     },
     {
@@ -82,17 +82,7 @@
       "name": ""
     },
     {
-      "@id": "http://viaf.org/viaf/149450342",
-      "@type": "Organization",
-      "name": "AARNet Pty Ltd"
-    },
-    {
-      "@id": "",
-      "@type": "Organization",
-      "name": ""
-    },
-    {
-      "@id": "https://viaf.org/viaf/149450342/",
+      "@id": "https://ror.org/03j2gem75",
       "@type": "Organization",
       "name": "AARNet Pty Ltd"
     }
