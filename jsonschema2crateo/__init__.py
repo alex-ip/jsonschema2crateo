@@ -5,6 +5,8 @@ from typing import Optional, Dict, Tuple, List, Union
 
 import requests
 
+EXPAND_SCHEMA_DOT_ORG = False
+
 TYPE_MAPPING = {
     "string": "Text",
     "boolean": "Boolean",
@@ -74,7 +76,7 @@ DATASET_CLASS = {
 }
 
 ENABLED_CLASSES = [
-    "https://schema.org/Dataset",
+    "Dataset",
     "Person",
     "Organization",
     "Book",
@@ -107,16 +109,6 @@ def property_is_multiple(property_values: Dict,
     )
 
 
-def convert2schema_dot_org(plain_id: str) -> str:
-    """
-    Convert plain identifier to schema.org URL if valid
-    """
-    if not re.match(r'http(s)?://', plain_id):
-        new_id = f'https://schema.org/{plain_id}'
-        if requests.head(new_id).status_code == 200:
-            return new_id
-
-    return plain_id
 
 class JSONSchema2CrateO:
     """
@@ -135,6 +127,7 @@ class JSONSchema2CrateO:
         self.input_json_schema: Dict = {}
         self.output_crateo_profile: Dict = {}
         self.context = {}
+        self.schema_dot_orgs = set()
 
         if input_json_schema_path:
             self.load(version)
@@ -167,6 +160,23 @@ class JSONSchema2CrateO:
 
         self.context = self.input_json_schema.get("@context", {})
 
+    def prepend_schema_dot_org(self, plain_id: str) -> str:
+        """
+        Convert plain identifier to schema.org URL if valid
+        """
+        if EXPAND_SCHEMA_DOT_ORG and not re.match(r'http(s)?://', plain_id):
+            new_id = f'https://schema.org/{plain_id}'
+
+            # Check cache
+            if new_id in self.schema_dot_orgs:
+                return new_id
+
+            if requests.head(new_id).status_code == 200:
+                self.schema_dot_orgs.add(new_id)
+                return new_id
+
+        return plain_id
+
     def convert_type_def(self, type_definitions: Union[Dict, List[Dict]]) -> List[Dict]:
         result_list = []
 
@@ -175,10 +185,12 @@ class JSONSchema2CrateO:
 
         for type_definition in type_definitions:
             if type_ref := type_definition.get("$ref"):  # Reference to class
-                type_value = re.match(
-                    r"#/definitions/(.*)",
-                    type_ref
-                ).group(1).title()
+                type_value = self.prepend_schema_dot_org(
+                    re.match(
+                        r"#/definitions/(.*)",
+                        type_ref
+                    ).group(1).title()
+                )
                 result_list.append({"type": type_value})
 
             elif type_value := type_definition.get("type"):
@@ -188,7 +200,8 @@ class JSONSchema2CrateO:
                         result_list += self.convert_type_def(type_definition["items"])
                     else:  # Simple type, e.g. "string"
                         result = dict(type_definition)
-                        result["type"] = TYPE_MAPPING.get(result["type"], result["type"])  # Map type name if required
+                        # Map type name if required
+                        result["type"] = self.prepend_schema_dot_org(TYPE_MAPPING.get(result["type"], result["type"]))
                         result_list.append(result)
                 elif type(type_value) == dict:
                     result_list += self.convert_type_def(type_value)
@@ -238,8 +251,7 @@ class JSONSchema2CrateO:
         )
 
         crateo_input = {
-            "id": PROPERTY_MAPPING.get(property_name, property_name),
-            # "id": convert2schema_dot_org(PROPERTY_MAPPING.get(property_name, property_name)),
+            "id": self.prepend_schema_dot_org(PROPERTY_MAPPING.get(property_name, property_name)),
             "name": PROPERTY_MAPPING.get(property_name, property_name),
             "label": property_name,
             "help_value": help_value,
@@ -303,15 +315,16 @@ class JSONSchema2CrateO:
         input_graph = input_json_schema["@graph"]
 
         # Add compulsory Dataset class
-        crateo_classes = {"Dataset": DATASET_CLASS}
-        # crateo_classes = {"https://schema.org/Dataset": DATASET_CLASS}
+        crateo_classes = {self.prepend_schema_dot_org("Dataset"): DATASET_CLASS}
+        for input_dict in DATASET_CLASS["inputs"]:
+            input_dict["type"] = [self.prepend_schema_dot_org(input_type)
+                                  for input_type in input_dict["type"]]
 
         for subgraph in input_graph:
             class_dict = {
                 "definition": "override",
             }
-            class_id = self.apply_context(subgraph["@id"])
-            # class_id = convert2schema_dot_org(self.apply_context(subgraph["@id"]))
+            class_id = self.prepend_schema_dot_org(self.apply_context(subgraph["@id"]))
 
             if rdfs_subclass := subgraph.get("rdfs:subClassOf"):
                 class_dict["subClassOf"] = [self.apply_context(rdfs_subclass["@id"])],
@@ -346,14 +359,13 @@ class JSONSchema2CrateO:
                 for definition_name, definition_values in input_definitions.items():
                     definition_class_name, definition_class = self.definition2class(definition_name, definition_values)
                     if definition_class:
-                        crateo_classes[self.apply_context(definition_class_name)] = definition_class
-                        # crateo_classes[convert2schema_dot_org(
-                        #     self.apply_context(definition_class_name)
-                        # )] = definition_class
+                        crateo_classes[self.prepend_schema_dot_org(
+                            self.apply_context(definition_class_name)
+                        )] = definition_class
 
         crateo_profile["rootDatasets"] = {
             "Schema": {
-                "type": f"https://schema.org/Dataset, {root_dataset}"
+                "type": f"{self.prepend_schema_dot_org('Dataset')}, {root_dataset}"
             }
         }
 
@@ -369,7 +381,8 @@ class JSONSchema2CrateO:
             ]
         }
 
-        crateo_profile["enabledClasses"] = list(ENABLED_CLASSES) + [root_dataset]
+        crateo_profile["enabledClasses"] = [self.prepend_schema_dot_org(class_name)
+                                            for class_name in ENABLED_CLASSES] + [root_dataset]
 
         crateo_profile["classes"] = crateo_classes
 
