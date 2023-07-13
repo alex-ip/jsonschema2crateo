@@ -20,11 +20,14 @@ def main():
     else:
         input_json_schema_path = sys.argv[1]
 
+    print(f'Creating Crate-O profile "{output_crateo_profile_path}" from JSONschema "{input_json_schema_path}')
+
     JSONSchema2CrateO(
         input_json_schema_path,
         output_crateo_profile_path
     )
 
+    print('Finished.')
 
 if __name__ == "__main__":
     main()

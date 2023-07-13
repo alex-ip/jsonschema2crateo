@@ -1,10 +1,13 @@
 import json
 import re
 import urllib.request
-from typing import Optional, Dict, Tuple, List
+from typing import Optional, Dict, Tuple, List, Union
+
+import requests
 
 TYPE_MAPPING = {
     "string": "Text",
+    "boolean": "Boolean",
 }
 
 PROPERTY_MAPPING = {
@@ -71,7 +74,7 @@ DATASET_CLASS = {
 }
 
 ENABLED_CLASSES = [
-    "Dataset",
+    "https://schema.org/Dataset",
     "Person",
     "Organization",
     "Book",
@@ -103,6 +106,17 @@ def property_is_multiple(property_values: Dict,
         )
     )
 
+
+def convert2schema_dot_org(plain_id: str) -> str:
+    """
+    Convert plain identifier to schema.org URL if valid
+    """
+    if not re.match(r'http(s)?://', plain_id):
+        new_id = f'https://schema.org/{plain_id}'
+        if requests.head(new_id).status_code == 200:
+            return new_id
+
+    return plain_id
 
 class JSONSchema2CrateO:
     """
@@ -153,37 +167,41 @@ class JSONSchema2CrateO:
 
         self.context = self.input_json_schema.get("@context", {})
 
-    def convert_type_def(self, type_definition: Dict) -> List[Dict]:
+    def convert_type_def(self, type_definitions: Union[Dict, List[Dict]]) -> List[Dict]:
         result_list = []
 
-        if type_ref := type_definition.get("$ref"):  # Reference to class
-            type_value = re.match(
-                r"#/definitions/(.*)",
-                type_ref
-            ).group(1).title()
-            result_list.append({"type": type_value})
+        if type(type_definitions) == dict:
+            type_definitions = [type_definitions]
 
-        elif type_value := type_definition.get("type"):
-            if type(type_value) == str:
-                if type_value == "array":
-                    # Recursive call to process array type
-                    result_list += self.convert_type_def(type_definition["items"])
-                else:  # Simple type, e.g. "string"
-                    result = dict(type_definition)
-                    result["type"] = TYPE_MAPPING.get(result["type"], result["type"])  # Map type name if required
-                    result_list.append(result)
-            elif type(type_value) == dict:
-                result_list += self.convert_type_def(type_value)
+        for type_definition in type_definitions:
+            if type_ref := type_definition.get("$ref"):  # Reference to class
+                type_value = re.match(
+                    r"#/definitions/(.*)",
+                    type_ref
+                ).group(1).title()
+                result_list.append({"type": type_value})
 
-        # "oneOf" and "anyOf" both contain list of type definitions. Only differ in cardinality
-        elif subtype_list := type_definition.get("oneOf") or type_definition.get("anyOf"):
-            for subtype_definition in subtype_list:
-                if description := type_definition.get("description"):
-                    subtype_definition["description"] = description
-                result_list += self.convert_type_def(subtype_definition)
+            elif type_value := type_definition.get("type"):
+                if type(type_value) == str:
+                    if type_value == "array":
+                        # Recursive call to process array type
+                        result_list += self.convert_type_def(type_definition["items"])
+                    else:  # Simple type, e.g. "string"
+                        result = dict(type_definition)
+                        result["type"] = TYPE_MAPPING.get(result["type"], result["type"])  # Map type name if required
+                        result_list.append(result)
+                elif type(type_value) == dict:
+                    result_list += self.convert_type_def(type_value)
 
-        else:
-            raise Exception(f"Unrecognised type_definition {type_definition}")
+            # "oneOf" and "anyOf" both contain list of type definitions. Only differ in cardinality
+            elif subtype_list := type_definition.get("oneOf") or type_definition.get("anyOf"):
+                for subtype_definition in subtype_list:
+                    if description := type_definition.get("description"):
+                        subtype_definition["description"] = description
+                    result_list += self.convert_type_def(subtype_definition)
+
+            else:
+                raise Exception(f"Unrecognised type_definition {type_definition}")
 
         return result_list
 
@@ -221,6 +239,7 @@ class JSONSchema2CrateO:
 
         crateo_input = {
             "id": PROPERTY_MAPPING.get(property_name, property_name),
+            # "id": convert2schema_dot_org(PROPERTY_MAPPING.get(property_name, property_name)),
             "name": PROPERTY_MAPPING.get(property_name, property_name),
             "label": property_name,
             "help_value": help_value,
@@ -285,12 +304,14 @@ class JSONSchema2CrateO:
 
         # Add compulsory Dataset class
         crateo_classes = {"Dataset": DATASET_CLASS}
+        # crateo_classes = {"https://schema.org/Dataset": DATASET_CLASS}
 
         for subgraph in input_graph:
             class_dict = {
                 "definition": "override",
             }
             class_id = self.apply_context(subgraph["@id"])
+            # class_id = convert2schema_dot_org(self.apply_context(subgraph["@id"]))
 
             if rdfs_subclass := subgraph.get("rdfs:subClassOf"):
                 class_dict["subClassOf"] = [self.apply_context(rdfs_subclass["@id"])],
@@ -326,10 +347,13 @@ class JSONSchema2CrateO:
                     definition_class_name, definition_class = self.definition2class(definition_name, definition_values)
                     if definition_class:
                         crateo_classes[self.apply_context(definition_class_name)] = definition_class
+                        # crateo_classes[convert2schema_dot_org(
+                        #     self.apply_context(definition_class_name)
+                        # )] = definition_class
 
         crateo_profile["rootDatasets"] = {
             "Schema": {
-                "type": f"http://schema.org/Dataset, {root_dataset}"
+                "type": f"https://schema.org/Dataset, {root_dataset}"
             }
         }
 
@@ -338,7 +362,9 @@ class JSONSchema2CrateO:
                 {
                     "name": "Main",
                     "description": "",
-                    "inputs": [class_input['id'] for class_input in crateo_classes[root_dataset]['inputs']]
+                    "inputs": [class_input['id']
+                               for class_input in crateo_classes[root_dataset]['inputs']
+                               ]
                 }
             ]
         }

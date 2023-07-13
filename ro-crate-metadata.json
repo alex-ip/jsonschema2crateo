@@ -37,7 +37,7 @@
         "@id": "https://ror.org/03j2gem75"
       },
       "softwareVersion": "0.0.0",
-      "isAccessibleForFree": "true"
+      "isAccessibleForFree": true
     },
     {
       "@id": "https://json-schema.org/",
