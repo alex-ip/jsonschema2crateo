@@ -3,6 +3,9 @@ import sys
 
 from jsonschema2crateo import JSONSchema2CrateO
 
+# DEFAULT_PROFILE = './test_data/ComputationalTool_v1.1-DRAFT.json'
+DEFAULT_PROFILE = 'https://raw.githubusercontent.com/Australian-Text-Analytics-Platform/bioschemas_specifications/' \
+                  'ATAP_Jupyter_Enhancements_proposed/ComputationalTool/jsonld/ComputationalTool_v1.1-DRAFT.json'
 
 def main():
     # print(os.path.abspath(os.curdir))
@@ -13,7 +16,7 @@ def main():
         output_crateo_profile_path = sys.argv[2]
 
     if len(sys.argv) < 2:
-        input_json_schema_path = './test_data/ComputationalTool_v1.1-DRAFT.json'
+        input_json_schema_path = DEFAULT_PROFILE
     else:
         input_json_schema_path = sys.argv[1]
 

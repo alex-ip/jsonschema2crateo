@@ -1,5 +1,6 @@
 import json
 import re
+import urllib.request
 from typing import Optional, Dict, Tuple, List
 
 TYPE_MAPPING = {
@@ -141,8 +142,14 @@ class JSONSchema2CrateO:
 
         assert self.input_json_schema_path, 'No input_json_schema_path provided'
 
-        with open(self.input_json_schema_path, 'r') as input_json_schema_file:
-            self.input_json_schema = json.loads(input_json_schema_file.read())
+        if re.match(r'http(s)?://', self.input_json_schema_path):
+            # Web source
+            self.input_json_schema = json.loads(
+                urllib.request.urlopen(self.input_json_schema_path).read().decode('utf8'))
+        else:
+            # File source
+            with open(self.input_json_schema_path, 'r') as input_json_schema_file:
+                self.input_json_schema = json.loads(input_json_schema_file.read())
 
         self.context = self.input_json_schema.get("@context", {})
 

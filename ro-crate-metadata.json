@@ -22,7 +22,7 @@
       "applicationSubCategory": [],
       "featureList": [],
       "description": "A utility to convert BioSchemas JSON Schema RO-Crate profiles into Crate-O profiles",
-      "name": [],
+      "name": "jsonschema2crateo",
       "url": "https://github.com/alex-ip/jsonschema2crateo",
       "author": {
         "@id": "https://orcid.org/0000-0001-8937-8904"
@@ -35,7 +35,9 @@
       "applicationSuite": [],
       "provider": {
         "@id": "https://ror.org/03j2gem75"
-      }
+      },
+      "softwareVersion": "0.0.0",
+      "isAccessibleForFree": "true"
     },
     {
       "@id": "https://json-schema.org/",
@@ -64,27 +66,17 @@
       }
     },
     {
+      "@id": "https://ror.org/03j2gem75",
+      "@type": "Organization",
+      "name": "AARNet Pty Ltd"
+    },
+    {
       "@id": "ro-crate-metadata.json",
       "@type": "CreativeWork",
       "identifier": "ro-crate-metadata.json",
       "about": {
         "@id": "./"
       }
-    },
-    {
-      "@id": "#undefined-applicationSubCategory-1",
-      "@type": "Edamtopic",
-      "name": []
-    },
-    {
-      "@id": "#undefined-featureList-1",
-      "@type": "Edamoperation",
-      "name": ""
-    },
-    {
-      "@id": "https://ror.org/03j2gem75",
-      "@type": "Organization",
-      "name": "AARNet Pty Ltd"
     }
   ]
 }
