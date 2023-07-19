@@ -319,8 +319,8 @@ class JSONSchema2CrateO:
         :return: Tuple[str, Dict], crateo_class_name, crateo_class
         """
         class_name = definition_name.title()
-        if class_type := definition_values.get("@type"):
-            class_name = self.expand_context(class_type, lookup_graph)
+        # if class_type := definition_values.get("@type"):
+        #     class_name = self.expand_context(class_type, lookup_graph)
 
         properties = (
                 definition_values.get("properties", {})
