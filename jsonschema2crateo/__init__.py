@@ -166,7 +166,8 @@ class JSONSchema2CrateO:
                                    ]
 
     def expand_context(self, plain_id: str,
-                       lookup_graph: List[Dict] = []
+                       lookup_graph: List[Dict] = [],
+                       expand_schema_dot_org: bool = False,
                        ) -> str:
         """
         Convert plain identifier to full URL
@@ -189,8 +190,8 @@ class JSONSchema2CrateO:
 
             # Expand context if provided
             if context_match := re.match(r'(\w+):(\w+)', new_id):
-                # Don't expand schema.org
-                if context_match.group(1) == self.schema_org_context:
+                # Don't expand schema.org unless forced
+                if context_match.group(1) == self.schema_org_context and not expand_schema_dot_org:
                     new_id = context_match.group(2)
                 else:
                     new_id = f'{self.context[context_match.group(1)]}{context_match.group(2)}'
@@ -198,14 +199,14 @@ class JSONSchema2CrateO:
                 self.expanded_ids[plain_id] = new_id
                 return new_id
 
-            # # Try to guess context as a last resort (Risky?)
-            # for context_name, context_prefix in self.context.items():
-            #     new_id = f'{context_prefix}{plain_id}'
-            #
-            #     response = requests.head(new_id, allow_redirects=True)
-            #     if response.status_code == 200:
-            #         self.expanded_ids[plain_id] = new_id
-            #         return new_id
+            # Try to guess context as a last resort (Risky?)
+            for context_name, context_prefix in self.context.items():
+                new_id = f'{context_prefix}{plain_id}'
+
+                response = requests.head(new_id, allow_redirects=True)
+                if response.status_code == 200:
+                    self.expanded_ids[plain_id] = new_id
+                    return new_id
 
         # No change
         self.expanded_ids[plain_id] = plain_id
@@ -249,7 +250,7 @@ class JSONSchema2CrateO:
             elif subtype_list := type_definition.get("oneOf") or type_definition.get("anyOf"):
                 for subtype_definition in subtype_list:
                     if description := type_definition.get("description"):
-                        subtype_definition["description"] = description
+                        subtype_definition["description"] = re.sub(r'\<.*?\>', '', description)  # Strip HTML tags
                     result_list += self.convert_type_def(subtype_definition, lookup_graph)
 
             else:
@@ -274,7 +275,7 @@ class JSONSchema2CrateO:
         type_dict_list = self.convert_type_def(property_values, lookup_graph)
         type_list = sorted(set([type_dict["type"] for type_dict in type_dict_list]))
         # Strip HTML tags
-        help_value = re.sub(r'<.*>', '',
+        help_value = re.sub(r'\<.*?\>', '',
                             (
                                     ', '.join(
                                         sorted(set([
@@ -295,9 +296,11 @@ class JSONSchema2CrateO:
                             )
 
         crateo_input = {
-            "id": self.expand_context(PROPERTY_MAPPING.get(property_name, property_name), lookup_graph),
+            "id": self.expand_context(PROPERTY_MAPPING.get(property_name, property_name),
+                                      lookup_graph,
+                                      expand_schema_dot_org=True),  # Force expansion of schema.org identifier
             "name": PROPERTY_MAPPING.get(property_name, property_name),
-            "label": re.sub("([a-z])([A-Z])","\g<1> \g<2>", property_name).title(),  # Expand camel case to spaces
+            "label": re.sub("([a-z])([A-Z])", "\g<1> \g<2>", property_name).title(),  # Expand camel case to spaces
             "help": help_value,
             "required": input_required,
             "multiple": property_is_multiple(property_values),
@@ -319,8 +322,8 @@ class JSONSchema2CrateO:
         :return: Tuple[str, Dict], crateo_class_name, crateo_class
         """
         class_name = definition_name.title()
-        # if class_type := definition_values.get("@type"):
-        #     class_name = self.expand_context(class_type, lookup_graph)
+        if class_type := definition_values.get("@type"):
+            class_name = self.expand_context(class_type, lookup_graph)
 
         properties = (
                 definition_values.get("properties", {})
@@ -342,7 +345,7 @@ class JSONSchema2CrateO:
                                     (property_name in definition_values.get("required", [])),
                                     )
                 for property_name, property_values in properties.items()
-                if property_name not in['identifier', '@id']
+                if property_name not in ['identifier', '@id']
             ]
         }
 
@@ -392,7 +395,7 @@ class JSONSchema2CrateO:
 
                     crateo_profile["metadata"] = {
                         "name": subgraph["rdfs:label"],
-                        "description": subgraph["rdfs:comment"],
+                        "description": re.sub(r'\<.*?\>', '', subgraph["rdfs:comment"]),  # Strip HTML tags
                         "version": "0.0.0"
                     }
 
@@ -405,7 +408,7 @@ class JSONSchema2CrateO:
                                         (property_name in input_validation.get("required", [])),
                                         )
                     for property_name, property_values in properties.items()
-                    if property_name not in['identifier', '@id']
+                    if property_name not in ['identifier', '@id']
                 ]
 
                 input_definitions = input_validation["definitions"]
@@ -418,16 +421,16 @@ class JSONSchema2CrateO:
                         crateo_classes[definition_class_name] = definition_class
                         # crateo_classes[self.expand_context(definition_class_name, input_graph)] = definition_class
 
-        root_dataset_types = [root_dataset_id]
-        # root_dataset_types = [root_dataset_id, dataset_class_id]
+        # root_dataset_types = [root_dataset_id]
+        root_dataset_types = [root_dataset_id, dataset_class_id]
         crateo_profile["rootDatasets"] = {
             "Schema": {
-                "type": ", ".join(root_dataset_types)
+                "type": root_dataset_types
             }
         }
 
         crateo_profile["layouts"] = {
-            root_dataset_id: [
+            root_dataset_id:
                 {
                     "name": f"{root_dataset_label} values",
                     "description": f"Inputs for {root_dataset_label}",
@@ -435,14 +438,14 @@ class JSONSchema2CrateO:
                                for class_input in crateo_classes[root_dataset_id]['inputs']
                                ]
                 },
-                # {
-                #     "name": "Dataset values",
-                #     "description": "Inputs for Dataset",
-                #     "inputs": [class_input['name']
-                #                for class_input in crateo_classes[dataset_class_id]['inputs']
-                #                ]
-                # }
-            ]
+            dataset_class_id:
+                {
+                    "name": "Dataset values",
+                    "description": "Inputs for Dataset",
+                    "inputs": [class_input['name']
+                               for class_input in crateo_classes[dataset_class_id]['inputs']
+                               ]
+                }
         }
 
         crateo_profile["enabledClasses"] = [root_dataset_id] + [class_name

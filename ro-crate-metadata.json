@@ -8,7 +8,11 @@
   "@graph": [
     {
       "@id": "./",
-      "@type": "https://discovery.biothings.io/view/bioschemas/ComputationalTool",
+      "@type": "Computationaltool",
+      "author": {
+        "@id": "https://orcid.org/0000-0001-8937-8904"
+      },
+      "https://discovery.biothings.io/view/bioschemas/codeRepository": "https://github.com/alex-ip/jsonschema2crateo",
       "input": {
         "@id": "https://json-schema.org/"
       },
@@ -18,32 +22,58 @@
       "programmingLanguage": {
         "@id": "https://www.python.org/"
       },
-      "applicationCategory": [],
-      "applicationSubCategory": [],
-      "featureList": [],
-      "description": "A utility to convert BioSchemas JSON Schema RO-Crate profiles into Crate-O profiles",
-      "name": "jsonschema2crateo",
-      "url": "https://github.com/alex-ip/jsonschema2crateo",
-      "author": {
-        "@id": "https://orcid.org/0000-0001-8937-8904"
-      },
-      "publisher": {
-        "@id": "https://ror.org/03j2gem75"
-      },
-      "codeRepository": "https://github.com/alex-ip/jsonschema2crateo",
       "downloadUrl": "https://github.com/alex-ip/jsonschema2crateo/archive/refs/heads/main.zip",
-      "applicationSuite": [],
+      "softwareRequirements": "",
       "provider": {
         "@id": "https://ror.org/03j2gem75"
       },
-      "softwareVersion": "0.0.0",
-      "isAccessibleForFree": true
+      "description": "A utility to convert BioSchemas JSON Schema RO-Crate profiles into Crate-O profiles",
+      "contributor": [],
+      "url": "https://github.com/alex-ip/jsonschema2crateo",
+      "isAccessibleForFree": true,
+      "citation": [],
+      "applicationSubCategory": [],
+      "publisher": {
+        "@id": "https://ror.org/03j2gem75"
+      },
+      "hasPart": [
+        {
+          "@id": "jsonschema2crateo/__main__.py"
+        },
+        {
+          "@id": "jsonschema2crateo/computationalTool_crate-o_profile.json"
+        },
+        {
+          "@id": "jsonschema2crateo/test/test_jsonschema2crateo.py"
+        },
+        {
+          "@id": "jsonschema2crateo/__init__.py"
+        },
+        {
+          "@id": "README.md"
+        }
+      ],
+      "license": {
+        "@id": "https://www.apache.org/licenses/LICENSE-2.0"
+      },
+      "keywords": [
+        "RO-crate",
+        "Crate-O",
+        "Translator",
+        "BioSchemas",
+        "ComputationalTool",
+        "JSONschema"
+      ]
+    },
+    {
+      "@id": "https://orcid.org/0000-0001-8937-8904",
+      "@type": "Person",
+      "name": "Alex Ip"
     },
     {
       "@id": "https://json-schema.org/",
       "@type": "Formalparameter",
-      "name": "JSON Schema RO-Crate Profile specification",
-      "url": []
+      "name": "JSONschema RO-Crate Profile specification"
     },
     {
       "@id": "https://json.org/",
@@ -53,22 +83,32 @@
     {
       "@id": "https://www.python.org/",
       "@type": "Computerlanguage",
-      "name": "Python"
-    },
-    {
-      "@id": "https://orcid.org/0000-0001-8937-8904",
-      "@type": "Person",
-      "name": "Alex Ip",
-      "givenName": "Alex",
-      "familyName": "Ip",
-      "affiliation": {
-        "@id": "https://ror.org/03j2gem75"
-      }
+      "name": "Python3"
     },
     {
       "@id": "https://ror.org/03j2gem75",
       "@type": "Organization",
       "name": "AARNet Pty Ltd"
+    },
+    {
+      "@id": "jsonschema2crateo/__main__.py",
+      "@type": "File"
+    },
+    {
+      "@id": "jsonschema2crateo/computationalTool_crate-o_profile.json",
+      "@type": "File"
+    },
+    {
+      "@id": "jsonschema2crateo/test/test_jsonschema2crateo.py",
+      "@type": "File"
+    },
+    {
+      "@id": "jsonschema2crateo/__init__.py",
+      "@type": "File"
+    },
+    {
+      "@id": "README.md",
+      "@type": "File"
     },
     {
       "@id": "ro-crate-metadata.json",
@@ -77,6 +117,11 @@
       "about": {
         "@id": "./"
       }
+    },
+    {
+      "@id": "https://www.apache.org/licenses/LICENSE-2.0",
+      "@type": "Creativework",
+      "name": "Apache 2.0"
     }
   ]
 }
