@@ -375,8 +375,8 @@ class JSONSchema2CrateO:
             class_dict = {
                 "definition": "override",
             }
-            class_id = subgraph["rdfs:label"].title()
-            # class_id = self.expand_context(subgraph["@id"], input_graph)
+            class_id = subgraph["rdfs:label"].title()  # Use short identifier
+            # class_id = self.expand_context(subgraph["@id"], input_graph)  # Use full URL
 
             if rdfs_superclasses := subgraph.get("rdfs:subClassOf"):
                 if type(rdfs_superclasses) == dict:
@@ -421,8 +421,8 @@ class JSONSchema2CrateO:
                         crateo_classes[definition_class_name] = definition_class
                         # crateo_classes[self.expand_context(definition_class_name, input_graph)] = definition_class
 
-        # root_dataset_types = [root_dataset_id]
-        root_dataset_types = [root_dataset_id, dataset_class_id]
+        # root_dataset_types = [root_dataset_id]  # Don't include Dataset class
+        root_dataset_types = [root_dataset_id, dataset_class_id]  # Include both root dataset class and Dataset class
         crateo_profile["rootDatasets"] = {
             "Schema": {
                 "type": root_dataset_types
@@ -448,8 +448,10 @@ class JSONSchema2CrateO:
                 }
         }
 
+        # Use short class names
         crateo_profile["enabledClasses"] = [root_dataset_id] + [class_name
                                                                 for class_name in ENABLED_CLASSES]
+        # Expand enabled class names
         # crateo_profile["enabledClasses"] = [root_dataset_id] + [self.expand_context(class_name, input_graph)
         #                                                         for class_name in ENABLED_CLASSES]
 
