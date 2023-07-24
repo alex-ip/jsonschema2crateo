@@ -63,7 +63,12 @@
         "BioSchemas",
         "ComputationalTool",
         "JSONschema"
-      ]
+      ],
+      "applicationCategory": "Script",
+      "softwareHelp": {
+        "@id": "https://github.com/alex-ip/jsonschema2crateo#readme"
+      },
+      "softwareVersion": "0.0.0"
     },
     {
       "@id": "https://orcid.org/0000-0001-8937-8904",
@@ -122,6 +127,11 @@
       "@id": "https://www.apache.org/licenses/LICENSE-2.0",
       "@type": "Creativework",
       "name": "Apache 2.0"
+    },
+    {
+      "@id": "https://github.com/alex-ip/jsonschema2crateo#readme",
+      "@type": "Creativework",
+      "name": "README.md"
     }
   ]
 }
