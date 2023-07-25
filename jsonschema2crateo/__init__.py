@@ -228,9 +228,11 @@ class JSONSchema2CrateO:
         for type_definition in type_definitions:
             if type_ref := type_definition.get("$ref"):  # Reference to class
                 type_value = re.match(
-                    r"#/definitions/(.*)",
-                    type_ref
-                ).group(1).title()
+                                        r"#/definitions/(.*)",
+                                        type_ref
+                                    ).group(1)
+                # Capitalise first letter without changing camel case
+                type_value = f'{type_value[0].upper()}{type_value[1:]}'
                 result_list.append({"type": type_value})
 
             elif type_value := type_definition.get("type"):
@@ -321,9 +323,12 @@ class JSONSchema2CrateO:
         :param lookup_graph: List[Dict]
         :return: Tuple[str, Dict], crateo_class_name, crateo_class
         """
-        class_name = definition_name.title()
-        if class_type := definition_values.get("@type"):
-            class_name = self.expand_context(class_type, lookup_graph)
+        class_name = f'{definition_name[0].upper()}{definition_name[1:]}'  # Capitalised short id
+
+        # if not (class_type := definition_values.get("@type")):
+        #     class_type = class_name
+        #
+        # class_type = self.expand_context(class_type, lookup_graph)
 
         properties = (
                 definition_values.get("properties", {})
@@ -337,6 +342,7 @@ class JSONSchema2CrateO:
 
         crateo_class = {
             "definition": "override",
+            # "id": class_type,  #TODO: Check if this is valid
             "subClassOf": [self.expand_context(superclass, lookup_graph) for superclass in superclasses],
             "inputs": [
                 self.property2input(property_name,
@@ -363,20 +369,21 @@ class JSONSchema2CrateO:
         input_graph = input_json_schema["@graph"]
 
         # Add compulsory Dataset class
-        dataset_class_id = "Dataset"
-        # dataset_class_id = self.expand_context('Dataset', input_graph)
+        dataset_class_id = "Dataset"  # Use short name
+        # dataset_class_id = self.expand_context('Dataset', input_graph)  # Expand full URL
         crateo_classes = {dataset_class_id: DATASET_CLASS}
 
-        for input_dict in DATASET_CLASS["inputs"]:
-            input_dict["type"] = [input_type
-                                  for input_type in input_dict["type"]]
+        # # Expand type identifiers
+        # for input_dict in DATASET_CLASS["inputs"]:
+        #     input_dict["type"] = [self.expand_context(input_type, input_graph)
+        #                           for input_type in input_dict["type"]]
 
         for subgraph in input_graph:
             class_dict = {
                 "definition": "override",
             }
-            class_id = subgraph["rdfs:label"].title()  # Use short identifier
-            # class_id = self.expand_context(subgraph["@id"], input_graph)  # Use full URL
+            class_id = f'{subgraph["rdfs:label"][0].upper()}{subgraph["rdfs:label"][1:]}'  # Capitalised short id
+            # class_id = self.expand_context(subgraph["@id"], input_graph)  # Full URL
 
             if rdfs_superclasses := subgraph.get("rdfs:subClassOf"):
                 if type(rdfs_superclasses) == dict:
@@ -422,7 +429,7 @@ class JSONSchema2CrateO:
                         # crateo_classes[self.expand_context(definition_class_name, input_graph)] = definition_class
 
         # root_dataset_types = [root_dataset_id]  # Don't include Dataset class
-        root_dataset_types = [root_dataset_id, dataset_class_id]  # Include both root dataset class and Dataset class
+        root_dataset_types = [dataset_class_id, root_dataset_id]  # Include both root dataset class and Dataset class
         crateo_profile["rootDatasets"] = {
             "Schema": {
                 "type": root_dataset_types

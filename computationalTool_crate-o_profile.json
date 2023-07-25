@@ -7,13 +7,13 @@
 	"rootDatasets": {
 		"Schema": {
 			"type": [
-				"Computationaltool",
-				"Dataset"
+				"Dataset",
+				"ComputationalTool"
 			]
 		}
 	},
 	"layouts": {
-		"Computationaltool": {
+		"ComputationalTool": {
 			"name": "ComputationalTool values",
 			"description": "Inputs for ComputationalTool",
 			"inputs": [
@@ -64,7 +64,7 @@
 		}
 	},
 	"enabledClasses": [
-		"Computationaltool",
+		"ComputationalTool",
 		"Dataset",
 		"Person",
 		"Organization",
@@ -132,7 +132,7 @@
 				}
 			]
 		},
-		"Computationaltool": {
+		"ComputationalTool": {
 			"definition": "override",
 			"subClassOf": [
 				"http://schema.org/SoftwareApplication"
@@ -157,7 +157,7 @@
 					"required": false,
 					"multiple": true,
 					"type": [
-						"Formalparameter"
+						"FormalParameter"
 					]
 				},
 				{
@@ -168,7 +168,7 @@
 					"required": false,
 					"multiple": true,
 					"type": [
-						"Formalparameter"
+						"FormalParameter"
 					]
 				},
 				{
@@ -179,7 +179,7 @@
 					"required": false,
 					"multiple": true,
 					"type": [
-						"Computerlanguage",
+						"ComputerLanguage",
 						"Text"
 					]
 				},
@@ -202,7 +202,7 @@
 					"required": false,
 					"multiple": true,
 					"type": [
-						"Edamtopic"
+						"EdamTopic"
 					]
 				},
 				{
@@ -235,7 +235,7 @@
 					"required": false,
 					"multiple": true,
 					"type": [
-						"Edamoperation",
+						"EdamOperation",
 						"Text"
 					]
 				},
@@ -258,7 +258,7 @@
 					"required": false,
 					"multiple": true,
 					"type": [
-						"Creativework"
+						"CreativeWork"
 					]
 				},
 				{
@@ -269,7 +269,7 @@
 					"required": false,
 					"multiple": true,
 					"type": [
-						"Softwareapplication"
+						"SoftwareApplication"
 					]
 				},
 				{
@@ -382,7 +382,7 @@
 					"required": false,
 					"multiple": true,
 					"type": [
-						"Creativework"
+						"CreativeWork"
 					]
 				},
 				{
@@ -404,7 +404,7 @@
 					"required": false,
 					"multiple": true,
 					"type": [
-						"Creativework",
+						"CreativeWork",
 						"Product",
 						"Text"
 					]
@@ -417,7 +417,7 @@
 					"required": false,
 					"multiple": true,
 					"type": [
-						"Creativework"
+						"CreativeWork"
 					]
 				},
 				{
@@ -439,7 +439,7 @@
 					"required": false,
 					"multiple": true,
 					"type": [
-						"Creativework",
+						"CreativeWork",
 						"Text"
 					]
 				},
@@ -500,7 +500,7 @@
 				}
 			]
 		},
-		"https://discovery.biothings.io/view/bioschemas/FormalParameter": {
+		"FormalParameter": {
 			"definition": "override",
 			"subClassOf": [],
 			"inputs": [
@@ -528,37 +528,45 @@
 				}
 			]
 		},
-		"http://schema.org/CreativeWork": {
+		"Schema": {
 			"definition": "override",
 			"subClassOf": [],
+			"inputs": [
+				{
+					"id": "http://schema.org/url",
+					"name": "url",
+					"label": "Url",
+					"help": "uri",
+					"required": false,
+					"multiple": false,
+					"type": [
+						"Text"
+					]
+				},
+				{
+					"id": "http://schema.org/name",
+					"name": "name",
+					"label": "Name",
+					"help": "",
+					"required": false,
+					"multiple": false,
+					"type": [
+						"Text"
+					]
+				}
+			]
+		},
+		"EdamTopic": {
+			"definition": "override",
+			"subClassOf": [
+				"http://edamontology.org/topic_0003"
+			],
 			"inputs": [
 				{
 					"id": "http://schema.org/name",
 					"name": "name",
 					"label": "Name",
-					"help": "Name of or title of the citation",
-					"required": false,
-					"multiple": false,
-					"type": [
-						"Text"
-					]
-				},
-				{
-					"id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#pmid",
-					"name": "pmid",
-					"label": "Pmid",
-					"help": "A pubmed identifier if available",
-					"required": false,
-					"multiple": false,
-					"type": [
-						"Text"
-					]
-				},
-				{
-					"id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#doi",
-					"name": "doi",
-					"label": "Doi",
-					"help": "A doi if available",
+					"help": "",
 					"required": false,
 					"multiple": false,
 					"type": [
@@ -569,18 +577,7 @@
 					"id": "http://schema.org/url",
 					"name": "url",
 					"label": "Url",
-					"help": "The url of the resource cited",
-					"required": false,
-					"multiple": false,
-					"type": [
-						"Text"
-					]
-				},
-				{
-					"id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#citeText",
-					"name": "citeText",
-					"label": "Cite Text",
-					"help": "The bibliographic citation for the referenced resource as is provided",
+					"help": "uri",
 					"required": false,
 					"multiple": false,
 					"type": [
@@ -589,7 +586,7 @@
 				}
 			]
 		},
-		"http://schema.org/DefinedTerm": {
+		"EdamOperation": {
 			"definition": "override",
 			"subClassOf": [
 				"http://edamontology.org/operation_0004"
@@ -619,7 +616,7 @@
 				}
 			]
 		},
-		"http://schema.org/SoftwareApplication": {
+		"CreativeWork": {
 			"definition": "override",
 			"subClassOf": [],
 			"inputs": [
@@ -647,7 +644,35 @@
 				}
 			]
 		},
-		"http://schema.org/PropertyValue": {
+		"SoftwareApplication": {
+			"definition": "override",
+			"subClassOf": [],
+			"inputs": [
+				{
+					"id": "http://schema.org/name",
+					"name": "name",
+					"label": "Name",
+					"help": "",
+					"required": false,
+					"multiple": false,
+					"type": [
+						"Text"
+					]
+				},
+				{
+					"id": "http://schema.org/url",
+					"name": "url",
+					"label": "Url",
+					"help": "uri",
+					"required": false,
+					"multiple": false,
+					"type": [
+						"Text"
+					]
+				}
+			]
+		},
+		"PropertyValue": {
 			"definition": "override",
 			"subClassOf": [],
 			"inputs": [
@@ -675,7 +700,7 @@
 				}
 			]
 		},
-		"http://schema.org/Person": {
+		"Person": {
 			"definition": "override",
 			"subClassOf": [],
 			"inputs": [
@@ -736,7 +761,7 @@
 				}
 			]
 		},
-		"http://schema.org/Organization": {
+		"Organization": {
 			"definition": "override",
 			"subClassOf": [],
 			"inputs": [
@@ -764,7 +789,68 @@
 				}
 			]
 		},
-		"http://schema.org/Product": {
+		"Citation": {
+			"definition": "override",
+			"subClassOf": [],
+			"inputs": [
+				{
+					"id": "http://schema.org/name",
+					"name": "name",
+					"label": "Name",
+					"help": "Name of or title of the citation",
+					"required": false,
+					"multiple": false,
+					"type": [
+						"Text"
+					]
+				},
+				{
+					"id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#pmid",
+					"name": "pmid",
+					"label": "Pmid",
+					"help": "A pubmed identifier if available",
+					"required": false,
+					"multiple": false,
+					"type": [
+						"Text"
+					]
+				},
+				{
+					"id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#doi",
+					"name": "doi",
+					"label": "Doi",
+					"help": "A doi if available",
+					"required": false,
+					"multiple": false,
+					"type": [
+						"Text"
+					]
+				},
+				{
+					"id": "http://schema.org/url",
+					"name": "url",
+					"label": "Url",
+					"help": "The url of the resource cited",
+					"required": false,
+					"multiple": false,
+					"type": [
+						"Text"
+					]
+				},
+				{
+					"id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#citeText",
+					"name": "citeText",
+					"label": "Cite Text",
+					"help": "The bibliographic citation for the referenced resource as is provided",
+					"required": false,
+					"multiple": false,
+					"type": [
+						"Text"
+					]
+				}
+			]
+		},
+		"Product": {
 			"definition": "override",
 			"subClassOf": [],
 			"inputs": [
@@ -792,7 +878,7 @@
 				}
 			]
 		},
-		"http://schema.org/ComputerLanguage": {
+		"ComputerLanguage": {
 			"definition": "override",
 			"subClassOf": [],
 			"inputs": [
