@@ -8,7 +8,7 @@
   "@graph": [
     {
       "@id": "./",
-      "@type": "Computationaltool",
+      "@type": "ComputationalTool",
       "author": {
         "@id": "https://orcid.org/0000-0001-8937-8904"
       },
@@ -68,12 +68,19 @@
       "softwareHelp": {
         "@id": "https://github.com/alex-ip/jsonschema2crateo#readme"
       },
-      "softwareVersion": "0.0.0"
+      "softwareVersion": "0.0.0",
+      "name": "jsonschema2crateo"
     },
     {
       "@id": "https://orcid.org/0000-0001-8937-8904",
       "@type": "Person",
-      "name": "Alex Ip"
+      "name": "Alex Ip",
+      "affiliation": {
+        "@id": "https://ror.org/03j2gem75"
+      },
+      "alternateName": "Alexander Ip",
+      "givenName": "Alex",
+      "familyName": "Ip"
     },
     {
       "@id": "https://json-schema.org/",
@@ -93,7 +100,8 @@
     {
       "@id": "https://ror.org/03j2gem75",
       "@type": "Organization",
-      "name": "AARNet Pty Ltd"
+      "name": "AARNet Pty Ltd",
+      "alternateName": "AARNet"
     },
     {
       "@id": "jsonschema2crateo/__main__.py",
@@ -116,14 +124,6 @@
       "@type": "File"
     },
     {
-      "@id": "ro-crate-metadata.json",
-      "@type": "CreativeWork",
-      "identifier": "ro-crate-metadata.json",
-      "about": {
-        "@id": "./"
-      }
-    },
-    {
       "@id": "https://www.apache.org/licenses/LICENSE-2.0",
       "@type": "Creativework",
       "name": "Apache 2.0"
@@ -132,6 +132,14 @@
       "@id": "https://github.com/alex-ip/jsonschema2crateo#readme",
       "@type": "Creativework",
       "name": "README.md"
+    },
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "identifier": "ro-crate-metadata.json",
+      "about": {
+        "@id": "./"
+      }
     }
   ]
 }

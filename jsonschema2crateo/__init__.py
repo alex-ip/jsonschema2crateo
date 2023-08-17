@@ -75,6 +75,93 @@ DATASET_CLASS = {
     ]
 }
 
+# Define default input groups
+IMPUT_GROUPS = [
+    {
+        "name": "About",
+        "description": "",
+        "inputs": ["@id", "@type", "name", "description"]
+    },
+    {
+        "name": "Main",
+        "description": "",
+        "inputs": [
+            "conformsTo",
+            "author",
+            "creator",
+            "datePublished"
+        ]
+    },
+    {
+        "name": "Related items",
+        "description": "",
+        "inputs": [
+            "publisher",
+            "funder",
+            "citation",
+            "affiliation"
+        ]
+    },
+    {
+        "name": "Structure",
+        "description": "",
+        "inputs": [
+            "memberOf",
+            "hasMember",
+            "isPartOf",
+            "hasPart",
+            "fileOf",
+            "hasFile"
+        ]
+    },
+    {
+        "name": "Provenance",
+        "description": "",
+        "inputs": [
+            "agent",
+            "object",
+            "instrument",
+            "result",
+            "participant",
+            "target"
+        ]
+    },
+    {
+        "name": "Space and Time",
+        "description": "",
+        "inputs": [
+            "temporalCoverage",
+            "spatialCoverage"
+        ]
+    },
+    {
+        "name": "Software Details",
+        "description": "",
+        "inputs": [
+            "codeRepository",
+            "input",
+            "output",
+            "downloadUrl",
+            "applicationSubCategory",
+            "applicationCategory",
+            "softwareVersion",
+            "featureList",
+            "applicationSuite",
+            "softwareHelp",
+            "softwareAddOn"
+        ]
+    },
+    {
+        "name": "Execution Environment",
+        "description": "Details of the language requirements and hardware needed to execute this tool",
+        "inputs": [
+            "softwareRequirements",
+            "programmingLanguage",
+            "operatingSystem"
+        ]
+    }
+]
+
 ENABLED_CLASSES = [
     "Dataset",
     "Person",
@@ -203,6 +290,8 @@ class JSONSchema2CrateO:
             for context_name, context_prefix in self.context.items():
                 new_id = f'{context_prefix}{plain_id}'
 
+                # TODO: Check what happens with "#" prefixes like "http://www.w3.org/2000/01/rdf-schema#"
+                # These may always return status_code = 200 for the default Turtle format returned
                 response = requests.head(new_id, allow_redirects=True)
                 if response.status_code == 200:
                     self.expanded_ids[plain_id] = new_id
@@ -228,9 +317,9 @@ class JSONSchema2CrateO:
         for type_definition in type_definitions:
             if type_ref := type_definition.get("$ref"):  # Reference to class
                 type_value = re.match(
-                                        r"#/definitions/(.*)",
-                                        type_ref
-                                    ).group(1)
+                    r"#/definitions/(.*)",
+                    type_ref
+                ).group(1)
                 # Capitalise first letter without changing camel case
                 type_value = f'{type_value[0].upper()}{type_value[1:]}'
                 result_list.append({"type": type_value})
@@ -436,24 +525,26 @@ class JSONSchema2CrateO:
             }
         }
 
-        crateo_profile["layouts"] = {
-            root_dataset_id:
-                {
-                    "name": f"{root_dataset_label} values",
-                    "description": f"Inputs for {root_dataset_label}",
-                    "inputs": [class_input['name']
-                               for class_input in crateo_classes[root_dataset_id]['inputs']
-                               ]
-                },
-            dataset_class_id:
-                {
-                    "name": "Dataset values",
-                    "description": "Inputs for Dataset",
-                    "inputs": [class_input['name']
-                               for class_input in crateo_classes[dataset_class_id]['inputs']
-                               ]
-                }
-        }
+        # crateo_profile["layouts"] = {
+        #     root_dataset_id:
+        #         {
+        #             "name": f"{root_dataset_label} values",
+        #             "description": f"Inputs for {root_dataset_label}",
+        #             "inputs": [class_input['name']
+        #                        for class_input in crateo_classes[root_dataset_id]['inputs']
+        #                        ]
+        #         },
+        #     dataset_class_id:
+        #         {
+        #             "name": "Dataset values",
+        #             "description": "Inputs for Dataset",
+        #             "inputs": [class_input['name']
+        #                        for class_input in crateo_classes[dataset_class_id]['inputs']
+        #                        ]
+        #         }
+        # }
+
+        crateo_profile["inputGroups"] = IMPUT_GROUPS
 
         # Use short class names
         crateo_profile["enabledClasses"] = [root_dataset_id] + [class_name

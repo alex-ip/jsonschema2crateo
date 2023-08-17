@@ -12,15 +12,76 @@
 			]
 		}
 	},
-	"layouts": {
-		"ComputationalTool": {
-			"name": "ComputationalTool values",
-			"description": "Inputs for ComputationalTool",
+	"inputGroups": [
+		{
+			"name": "About",
+			"description": "",
+			"inputs": [
+				"@id",
+				"@type",
+				"name",
+				"description"
+			]
+		},
+		{
+			"name": "Main",
+			"description": "",
+			"inputs": [
+				"conformsTo",
+				"author",
+				"creator",
+				"datePublished"
+			]
+		},
+		{
+			"name": "Related items",
+			"description": "",
+			"inputs": [
+				"publisher",
+				"funder",
+				"citation",
+				"affiliation"
+			]
+		},
+		{
+			"name": "Structure",
+			"description": "",
+			"inputs": [
+				"memberOf",
+				"hasMember",
+				"isPartOf",
+				"hasPart",
+				"fileOf",
+				"hasFile"
+			]
+		},
+		{
+			"name": "Provenance",
+			"description": "",
+			"inputs": [
+				"agent",
+				"object",
+				"instrument",
+				"result",
+				"participant",
+				"target"
+			]
+		},
+		{
+			"name": "Space and Time",
+			"description": "",
+			"inputs": [
+				"temporalCoverage",
+				"spatialCoverage"
+			]
+		},
+		{
+			"name": "Software Details",
+			"description": "",
 			"inputs": [
 				"codeRepository",
 				"input",
 				"output",
-				"programmingLanguage",
 				"downloadUrl",
 				"applicationSubCategory",
 				"applicationCategory",
@@ -28,41 +89,19 @@
 				"featureList",
 				"applicationSuite",
 				"softwareHelp",
-				"softwareAddOn",
-				"operatingSystem",
-				"description",
-				"name",
-				"url",
-				"author",
-				"citation",
-				"contributor",
-				"discussionUrl",
-				"funder",
-				"hasPart",
-				"isAccessibleForFree",
-				"isBasedOn",
-				"isPartOf",
-				"keywords",
-				"license",
-				"provider",
-				"thumbnailUrl",
-				"sameAs",
-				"executionUrl",
-				"softwareRequirements"
+				"softwareAddOn"
 			]
 		},
-		"Dataset": {
-			"name": "Dataset values",
-			"description": "Inputs for Dataset",
+		{
+			"name": "Execution Environment",
+			"description": "Details of the language requirements and hardware needed to execute this tool",
 			"inputs": [
-				"mentions",
-				"name",
-				"author",
-				"publisher",
-				"description"
+				"softwareRequirements",
+				"programmingLanguage",
+				"operatingSystem"
 			]
 		}
-	},
+	],
 	"enabledClasses": [
 		"ComputationalTool",
 		"Dataset",
@@ -172,7 +211,7 @@
 					]
 				},
 				{
-					"id": "https://discovery.biothings.io/view/bioschemas/programmingLanguage",
+					"id": "http://schema.org/programmingLanguage",
 					"name": "programmingLanguage",
 					"label": "Programming Language",
 					"help": "The main programming language(s) used to build or execute the tool. Please use terms from the \u2018Programming language\u2019 table in the Bio.Tools documentation",
