@@ -1,0 +1,57 @@
+{
+  "definition": "override",
+  "subClassOf": [],
+  "inputs": [
+    {
+      "id": "http://schema.org/mentions",
+      "name": "mentions",
+      "help": "The Classes, Properties etc",
+      "type": [
+        "rdfs:Class",
+        "rdf:Property",
+        "definedTerm",
+        "definedTermSet"
+      ],
+      "multiple": true
+    },
+    {
+      "id": "http://schema.org/name",
+      "name": "name",
+      "label": "Name",
+      "help": "The name of this ontology",
+      "required": true,
+      "multiple": false,
+      "type": [
+        "Text"
+      ]
+    },
+    {
+      "id": "http://schema.org/author",
+      "name": "author",
+      "help": "The person or organization responsible for creating this collection of data",
+      "type": [
+        "Person",
+        "Organization"
+      ],
+      "multiple": true
+    },
+    {
+      "id": "http://schema.org/publisher",
+      "name": "publisher",
+      "help": "The organization responsible for releasing this collection of data",
+      "type": [
+        "Organization"
+      ],
+      "multiple": true
+    },
+    {
+      "id": "http://schema.org/description",
+      "name": "description",
+      "help": "An abstract of the collection. Include as much detail as possible about the motivation and use of the collection, including things that we do not yet have properties for",
+      "type": [
+        "TextArea"
+      ],
+      "multiple": false
+    }
+  ]
+}

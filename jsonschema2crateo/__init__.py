@@ -1,11 +1,17 @@
 import json
+import os.path
 import re
 import urllib.request
 from typing import Optional, Dict, Tuple, List, Union
 
 import requests
 
+SCRIPT_DIR = os.path.dirname(__file__)
+
 EXPAND_CONTEXT = True
+
+BIOSCHEMAS_URL = "https://raw.githubusercontent.com/BioSchemas/bioschemas-dde/main/bioschemas.json"
+BIOSCHEMAS_SPEC_FILE = os.path.basename(BIOSCHEMAS_URL)
 
 TYPE_MAPPING = {
     "string": "Text",
@@ -16,151 +22,16 @@ PROPERTY_MAPPING = {
     "identifier": "@id"
 }
 
-DATASET_CLASS = {
-    "definition": "override",
-    "subClassOf": [],
-    "inputs": [
-        {
-            "id": "http://schema.org/mentions",
-            "name": "mentions",
-            "help": "The Classes, Properties etc",
-            "type": [
-                "rdfs:Class",
-                "rdf:Property",
-                "definedTerm",
-                "definedTermSet"
-            ],
-            "multiple": True
-        },
-        {
-            "id": "http://schema.org/name",
-            "name": "name",
-            "label": "Name",
-            "help": "The name of this ontology",
-            "required": True,
-            "multiple": False,
-            "type": [
-                "Text"
-            ]
-        },
-        {
-            "id": "http://schema.org/author",
-            "name": "author",
-            "help": "The person or organization responsible for creating this collection of data",
-            "type": [
-                "Person",
-                "Organization"
-            ],
-            "multiple": True
-        },
-        {
-            "id": "http://schema.org/publisher",
-            "name": "publisher",
-            "help": "The organization responsible for releasing this collection of data",
-            "type": [
-                "Organization"
-            ],
-            "multiple": True
-        },
-        {
-            "id": "http://schema.org/description",
-            "name": "description",
-            "help": "An abstract of the collection. Include as much detail as possible about the motivation and use of "
-                    "the collection, including things that we do not yet have properties for",
-            "type": [
-                "TextArea"
-            ],
-            "multiple": False
-        }
-    ]
+CONTEXT_OVERRIDES = {
+#    "bioschemas": "https://bioschemas.org/ComputationalWorkflow#"
 }
 
+with open(os.path.join(SCRIPT_DIR, 'dataset_class.json'), 'r') as dataset_class_file:
+    DATASET_CLASS = json.load(dataset_class_file)
+
 # Define default input groups
-IMPUT_GROUPS = [
-    {
-        "name": "About",
-        "description": "",
-        "inputs": ["@id", "@type", "name", "description"]
-    },
-    {
-        "name": "Main",
-        "description": "",
-        "inputs": [
-            "conformsTo",
-            "author",
-            "creator",
-            "datePublished"
-        ]
-    },
-    {
-        "name": "Related items",
-        "description": "",
-        "inputs": [
-            "publisher",
-            "funder",
-            "citation",
-            "affiliation"
-        ]
-    },
-    {
-        "name": "Structure",
-        "description": "",
-        "inputs": [
-            "memberOf",
-            "hasMember",
-            "isPartOf",
-            "hasPart",
-            "fileOf",
-            "hasFile"
-        ]
-    },
-    {
-        "name": "Provenance",
-        "description": "",
-        "inputs": [
-            "agent",
-            "object",
-            "instrument",
-            "result",
-            "participant",
-            "target"
-        ]
-    },
-    {
-        "name": "Space and Time",
-        "description": "",
-        "inputs": [
-            "temporalCoverage",
-            "spatialCoverage"
-        ]
-    },
-    {
-        "name": "Software Details",
-        "description": "",
-        "inputs": [
-            "codeRepository",
-            "input",
-            "output",
-            "downloadUrl",
-            "applicationSubCategory",
-            "applicationCategory",
-            "softwareVersion",
-            "featureList",
-            "applicationSuite",
-            "softwareHelp",
-            "softwareAddOn"
-        ]
-    },
-    {
-        "name": "Execution Environment",
-        "description": "Details of the language requirements and hardware needed to execute this tool",
-        "inputs": [
-            "softwareRequirements",
-            "programmingLanguage",
-            "operatingSystem"
-        ]
-    }
-]
+with open(os.path.join(SCRIPT_DIR, 'input_groups.json'), 'r') as input_groups_file:
+    INPUT_GROUPS = json.load(input_groups_file)
 
 ENABLED_CLASSES = [
     "Dataset",
@@ -172,6 +43,9 @@ ENABLED_CLASSES = [
     "CreativeWork",
     "CollectionProtocol",
 ]
+
+
+
 
 
 def property_is_multiple(property_values: Dict,
@@ -195,6 +69,18 @@ def property_is_multiple(property_values: Dict,
         )
     )
 
+def get_bioschemas() -> Dict:
+    """Return a dict of BioSchemas """
+    bioschemas_json = None
+    if os.path.isfile(BIOSCHEMAS_SPEC_FILE):
+        with open(BIOSCHEMAS_SPEC_FILE, 'r') as bioschemas_spec_file:
+            bioschemas_json = bioschemas_spec_file.read()
+    else:
+        bioschemas_json = urllib.request.urlopen(BIOSCHEMAS_URL).read().decode('utf8')
+        with open(BIOSCHEMAS_SPEC_FILE, 'w') as bioschemas_spec_file:
+            bioschemas_spec_file.write(bioschemas_json)
+
+    return json.loads(bioschemas_json)
 
 class JSONSchema2CrateO:
     """
@@ -215,6 +101,7 @@ class JSONSchema2CrateO:
         self.context = {}
         self.expanded_ids = {}
         self.schema_org_context = ""
+        self.bioschemas = get_bioschemas()
 
         if input_json_schema_path:
             self.load(version)
@@ -277,6 +164,10 @@ class JSONSchema2CrateO:
 
             # Expand context if provided
             if context_match := re.match(r'(\w+):(\w+)', new_id):
+                # Try overrides first
+                if prefix_override := CONTEXT_OVERRIDES.get(context_match.group(1)):
+                    return f'{prefix_override}{context_match.group(2)}'
+
                 # Don't expand schema.org unless forced
                 if context_match.group(1) == self.schema_org_context and not expand_schema_dot_org:
                     new_id = context_match.group(2)
@@ -288,14 +179,23 @@ class JSONSchema2CrateO:
 
             # Try to guess context as a last resort (Risky?)
             for context_name, context_prefix in self.context.items():
+
+                # Ignore any prefix ending with "#". These will always return status_code = 200 even on lookup failure
+                if context_prefix[-1] == '#':
+                    continue
+
                 new_id = f'{context_prefix}{plain_id}'
 
-                # TODO: Check what happens with "#" prefixes like "http://www.w3.org/2000/01/rdf-schema#"
-                # These may always return status_code = 200 for the default Turtle format returned
-                response = requests.head(new_id, allow_redirects=True)
-                if response.status_code == 200:
-                    self.expanded_ids[plain_id] = new_id
-                    return new_id
+                # Special case for bioschemas because a failed lookup will still return a 200 response
+                if context_name == 'bioschemas':
+                    for bioschemas_class in self.bioschemas["@graph"]:
+                        if bioschemas_class["@id"] == f"{context_name}:{plain_id}":
+                            return new_id
+                else:
+                    response = requests.get(new_id, allow_redirects=True)
+                    if response.status_code == 200:
+                        self.expanded_ids[plain_id] = new_id
+                        return new_id
 
         # No change
         self.expanded_ids[plain_id] = plain_id
@@ -544,7 +444,7 @@ class JSONSchema2CrateO:
         #         }
         # }
 
-        crateo_profile["inputGroups"] = IMPUT_GROUPS
+        crateo_profile["inputGroups"] = INPUT_GROUPS
 
         # Use short class names
         crateo_profile["enabledClasses"] = [root_dataset_id] + [class_name
@@ -569,3 +469,5 @@ class JSONSchema2CrateO:
 
         with open(self.output_crateo_profile_path, 'w') as output_crateo_profile_file:
             output_crateo_profile_file.write(json.dumps(self.output_crateo_profile, indent='\t'))
+
+

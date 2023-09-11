@@ -19,86 +19,86 @@
 			"inputs": [
 				"@id",
 				"@type",
-				"name",
-				"description"
+				"http://schema.org/name",
+				"http://schema.org/description"
 			]
 		},
 		{
 			"name": "Main",
 			"description": "",
 			"inputs": [
-				"conformsTo",
-				"author",
-				"creator",
-				"datePublished"
+				"http://schema.org/conformsTo",
+				"http://schema.org/author",
+				"http://schema.org/creator",
+				"http://schema.org/datePublished"
 			]
 		},
 		{
 			"name": "Related items",
 			"description": "",
 			"inputs": [
-				"publisher",
-				"funder",
-				"citation",
-				"affiliation"
+				"http://schema.org/publisher",
+				"http://schema.org/funder",
+				"http://schema.org/citation",
+				"http://schema.org/affiliation"
 			]
 		},
 		{
 			"name": "Structure",
 			"description": "",
 			"inputs": [
-				"memberOf",
-				"hasMember",
-				"isPartOf",
-				"hasPart",
-				"fileOf",
-				"hasFile"
+				"http://schema.org/memberOf",
+				"http://schema.org/hasMember",
+				"http://schema.org/isPartOf",
+				"http://schema.org/hasPart",
+				"http://schema.org/fileOf",
+				"http://schema.org/hasFile"
 			]
 		},
 		{
 			"name": "Provenance",
 			"description": "",
 			"inputs": [
-				"agent",
-				"object",
-				"instrument",
-				"result",
-				"participant",
-				"target"
+				"http://schema.org/agent",
+				"http://schema.org/object",
+				"http://schema.org/instrument",
+				"http://schema.org/result",
+				"http://schema.org/participant",
+				"http://schema.org/target"
 			]
 		},
 		{
 			"name": "Space and Time",
 			"description": "",
 			"inputs": [
-				"temporalCoverage",
-				"spatialCoverage"
+				"http://schema.org/temporalCoverage",
+				"http://schema.org/spatialCoverage"
 			]
 		},
 		{
 			"name": "Software Details",
 			"description": "",
 			"inputs": [
-				"codeRepository",
-				"input",
-				"output",
-				"downloadUrl",
-				"applicationSubCategory",
-				"applicationCategory",
-				"softwareVersion",
-				"featureList",
-				"applicationSuite",
-				"softwareHelp",
-				"softwareAddOn"
+				"https://discovery.biothings.io/view/bioschemas/codeRepository",
+				"https://discovery.biothings.io/view/bioschemas/input",
+				"https://discovery.biothings.io/view/bioschemas/output",
+				"http://schema.org/downloadUrl",
+				"https://discovery.biothings.io/view/bioschemas/applicationSubCategory",
+				"https://discovery.biothings.io/view/bioschemas/applicationCategory",
+				"http://schema.org/softwareVersion",
+				"http://schema.org/featureList",
+				"http://schema.org/applicationSuite",
+				"http://schema.org/softwareHelp",
+				"http://schema.org/softwareAddOn"
 			]
 		},
 		{
 			"name": "Execution Environment",
 			"description": "Details of the language requirements and hardware needed to execute this tool",
 			"inputs": [
-				"softwareRequirements",
-				"programmingLanguage",
-				"operatingSystem"
+				"http://schema.org/softwareRequirements",
+				"http://schema.org/programmingLanguage",
+				"http://schema.org/operatingSystem"
 			]
 		}
 	],
@@ -516,7 +516,7 @@
 					]
 				},
 				{
-					"id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#executionUrl",
+					"id": "executionUrl",
 					"name": "executionUrl",
 					"label": "Execution Url",
 					"help": "A link to known page(s) for executing the ComputationalTool.",
@@ -844,7 +844,7 @@
 					]
 				},
 				{
-					"id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#pmid",
+					"id": "pmid",
 					"name": "pmid",
 					"label": "Pmid",
 					"help": "A pubmed identifier if available",
@@ -855,7 +855,7 @@
 					]
 				},
 				{
-					"id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#doi",
+					"id": "doi",
 					"name": "doi",
 					"label": "Doi",
 					"help": "A doi if available",
@@ -877,7 +877,7 @@
 					]
 				},
 				{
-					"id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#citeText",
+					"id": "citeText",
 					"name": "citeText",
 					"label": "Cite Text",
 					"help": "The bibliographic citation for the referenced resource as is provided",
