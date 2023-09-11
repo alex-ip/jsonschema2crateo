@@ -3,45 +3,62 @@
     "https://w3id.org/ro/crate/1.1/context",
     {
       "@vocab": "http://schema.org/"
+    },
+    {
+      "@type": "@type"
+    },
+    {
+      "input": "https://discovery.biothings.io/view/bioschemas/input"
+    },
+    {
+      "@id": "@id"
+    },
+    {
+      "output": "https://discovery.biothings.io/view/bioschemas/output"
     }
   ],
   "@graph": [
     {
       "@id": "./",
-      "@type": "ComputationalTool",
-      "author": {
-        "@id": "https://orcid.org/0000-0001-8937-8904"
-      },
-      "https://discovery.biothings.io/view/bioschemas/codeRepository": "https://github.com/alex-ip/jsonschema2crateo",
+      "@type": [
+        "Dataset",
+        "ComputationalTool"
+      ],
       "input": {
         "@id": "https://json-schema.org/"
       },
       "output": {
         "@id": "https://json.org/"
       },
-      "programmingLanguage": {
-        "@id": "https://www.python.org/"
-      },
-      "downloadUrl": "https://github.com/alex-ip/jsonschema2crateo/archive/refs/heads/main.zip",
-      "softwareRequirements": "",
-      "provider": {
-        "@id": "https://ror.org/03j2gem75"
-      },
+      "name": "jsonschema2crateo",
       "description": "A utility to convert BioSchemas JSON Schema RO-Crate profiles into Crate-O profiles",
-      "contributor": [],
-      "url": "https://github.com/alex-ip/jsonschema2crateo",
-      "isAccessibleForFree": true,
-      "citation": [],
-      "applicationSubCategory": [],
+      "author": {
+        "@id": "https://orcid.org/0000-0001-8937-8904"
+      },
       "publisher": {
         "@id": "https://ror.org/03j2gem75"
       },
       "hasPart": [
         {
+          "@id": "computationalTool_crate-o_profile.json"
+        },
+        {
           "@id": "jsonschema2crateo/__main__.py"
         },
         {
-          "@id": "jsonschema2crateo/computationalTool_crate-o_profile.json"
+          "@id": "jsonschema2crateo/test_data/ComputationalTool_v1.1-DRAFT.json"
+        },
+        {
+          "@id": "jsonschema2crateo/__pycache__/__main__.cpython-310.pyc"
+        },
+        {
+          "@id": "jsonschema2crateo/__pycache__/__init__.cpython-310.pyc"
+        },
+        {
+          "@id": "jsonschema2crateo/dataset_class.json"
+        },
+        {
+          "@id": "jsonschema2crateo/input_groups.json"
         },
         {
           "@id": "jsonschema2crateo/test/test_jsonschema2crateo.py"
@@ -51,51 +68,50 @@
         },
         {
           "@id": "README.md"
+        },
+        {
+          "@id": "bioschemas.json"
+        },
+        {
+          "@id": "ro-crate-metadata - Copy.json"
+        },
+        {
+          "@id": "computationalWorkflow_crate-o_profile.json"
         }
       ],
-      "license": {
-        "@id": "https://www.apache.org/licenses/LICENSE-2.0"
-      },
-      "keywords": [
-        "RO-crate",
-        "Crate-O",
-        "Translator",
-        "BioSchemas",
-        "ComputationalTool",
-        "JSONschema"
-      ],
-      "applicationCategory": "Script",
+      "downloadUrl": "https://github.com/alex-ip/jsonschema2crateo/archive/refs/heads/main.zip",
       "softwareHelp": {
         "@id": "https://github.com/alex-ip/jsonschema2crateo#readme"
       },
-      "softwareVersion": "0.0.0",
-      "name": "jsonschema2crateo"
+      "programmingLanguage": {
+        "@id": "https://www.python.org/"
+      },
+      "url": "https://github.com/alex-ip/jsonschema2crateo",
+      "isAccessibleForFree": true,
+      "license": {
+        "@id": "https://www.apache.org/licenses/LICENSE-2.0"
+      }
+    },
+    {
+      "@id": "https://json-schema.org/",
+      "@type": "FormalParameter",
+      "name": "JSONschema RO-Crate Profile specification"
+    },
+    {
+      "@id": "https://json.org/",
+      "@type": "FormalParameter",
+      "name": "Crate-O Profile JSON file"
     },
     {
       "@id": "https://orcid.org/0000-0001-8937-8904",
       "@type": "Person",
       "name": "Alex Ip",
+      "alternateName": "Alexander Ian Ip",
+      "givenName": "Alex",
+      "familyName": "Ip",
       "affiliation": {
         "@id": "https://ror.org/03j2gem75"
-      },
-      "alternateName": "Alexander Ip",
-      "givenName": "Alex",
-      "familyName": "Ip"
-    },
-    {
-      "@id": "https://json-schema.org/",
-      "@type": "Formalparameter",
-      "name": "JSONschema RO-Crate Profile specification"
-    },
-    {
-      "@id": "https://json.org/",
-      "@type": "Formalparameter",
-      "name": "Crate-O Profile JSON file"
-    },
-    {
-      "@id": "https://www.python.org/",
-      "@type": "Computerlanguage",
-      "name": "Python3"
+      }
     },
     {
       "@id": "https://ror.org/03j2gem75",
@@ -104,11 +120,31 @@
       "alternateName": "AARNet"
     },
     {
+      "@id": "computationalTool_crate-o_profile.json",
+      "@type": "File"
+    },
+    {
       "@id": "jsonschema2crateo/__main__.py",
       "@type": "File"
     },
     {
-      "@id": "jsonschema2crateo/computationalTool_crate-o_profile.json",
+      "@id": "jsonschema2crateo/test_data/ComputationalTool_v1.1-DRAFT.json",
+      "@type": "File"
+    },
+    {
+      "@id": "jsonschema2crateo/__pycache__/__main__.cpython-310.pyc",
+      "@type": "File"
+    },
+    {
+      "@id": "jsonschema2crateo/__pycache__/__init__.cpython-310.pyc",
+      "@type": "File"
+    },
+    {
+      "@id": "jsonschema2crateo/dataset_class.json",
+      "@type": "File"
+    },
+    {
+      "@id": "jsonschema2crateo/input_groups.json",
       "@type": "File"
     },
     {
@@ -124,14 +160,32 @@
       "@type": "File"
     },
     {
-      "@id": "https://www.apache.org/licenses/LICENSE-2.0",
-      "@type": "Creativework",
-      "name": "Apache 2.0"
+      "@id": "bioschemas.json",
+      "@type": "File"
+    },
+    {
+      "@id": "ro-crate-metadata - Copy.json",
+      "@type": "File"
+    },
+    {
+      "@id": "computationalWorkflow_crate-o_profile.json",
+      "@type": "File"
     },
     {
       "@id": "https://github.com/alex-ip/jsonschema2crateo#readme",
-      "@type": "Creativework",
-      "name": "README.md"
+      "@type": "CreativeWork",
+      "name": "jsonschema2crateo readme file"
+    },
+    {
+      "@id": "https://www.python.org/",
+      "@type": "ComputerLanguage",
+      "name": "Python 3"
+    },
+    {
+      "@id": "https://www.apache.org/licenses/LICENSE-2.0",
+      "@type": "CreativeWork",
+      "name": "Apache 2.0 License",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
     },
     {
       "@id": "ro-crate-metadata.json",
