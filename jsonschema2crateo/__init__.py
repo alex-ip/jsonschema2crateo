@@ -224,13 +224,19 @@ class JSONSchema2CrateO:
                 type_value = f'{type_value[0].upper()}{type_value[1:]}'
                 result_list.append({"type": type_value})
 
-            elif type_value := type_definition.get("type"):
+            elif type_value := type_definition.get("@type", type_definition.get("type")):
                 if type(type_value) == str:
                     if type_value == "array":
                         # Recursive call to process array type
                         result_list += self.convert_type_def(type_definition["items"], lookup_graph)
                     else:  # Simple type, e.g. "string"
                         result = dict(type_definition)
+
+                        # Check for two type definitions as found in computationalWorkflow
+                        if set(["@type", "type"]).issubset(set(result.keys())):
+                            result["type"] = result["@type"]
+                            del result["@type"]
+
                         # Map type name if required
                         result["type"] = TYPE_MAPPING.get(result["type"], result["type"])
                         result_list.append(result)
