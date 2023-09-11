@@ -270,7 +270,8 @@ class JSONSchema2CrateO:
         :return: crateo_input
         """
         type_dict_list = self.convert_type_def(property_values, lookup_graph)
-        type_list = sorted(set([type_dict["type"] for type_dict in type_dict_list]))
+        type_list = list(set([type_dict["type"] for type_dict in type_dict_list]))
+        type_list = sorted([type_value.split(':')[-1] for type_value in type_list])  # Strip context prefixes
         # Strip HTML tags
         help_value = re.sub(r'\<.*?\>', '',
                             (
